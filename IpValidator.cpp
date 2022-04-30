@@ -32,15 +32,12 @@ void IpValidator::setStartPos(const streampos startPos)
 void IpValidator::exploreIps()
 {
     string ip;
-    uniqueIPv4List_.clear();
-    uniqueIPv6List_.clear();
     while(file_ and file_.tellg() < endPos_)
     {
         getline(file_, ip);
         examineIP(ip);
         file_.tellg();
     }
-    //printCounters();
 }
 
 void IpValidator::examineIP(string ip)
@@ -50,12 +47,12 @@ void IpValidator::examineIP(string ip)
         counter_.incrementIpv4Count();
         if(uniqueIPv4List_.find(ip) == uniqueIPv4List_.end())
         {
+            lock_guard<mutex> lock(mtx_);
+            if(uniqueIPv4List_.find(ip) == uniqueIPv4List_.end())
             {
-                lock_guard<mutex> lock(mtx_);
-                //cout<<"unique IP: "<<ip<<endl;//debug log
                 uniqueIPv4List_.insert(ip);
+                counter_.incrementUniqueIpv4Count();
             }
-            counter_.incrementUniqueIpv4Count();
         }
     }
     else if (isValidIPv6(ip))
@@ -63,11 +60,12 @@ void IpValidator::examineIP(string ip)
         counter_.incrementIpv6Count();
         if(uniqueIPv6List_.find(ip) == uniqueIPv6List_.end())
         {
+            lock_guard<mutex> lock(mtx_);
+            if(uniqueIPv6List_.find(ip) == uniqueIPv6List_.end())
             {
-                lock_guard<mutex> lock(mtx_);
                 uniqueIPv6List_.insert(ip);
+                counter_.incrementUniqueIpv6Count();
             }
-            counter_.incrementUniqueIpv6Count();
         }
     }
     else
@@ -95,8 +93,8 @@ bool IpValidator::isValidIPv4(string ip)
     string intermediate;
 
     // Tokenizing w.r.t. '.'
-    while (getline(check1,
-                intermediate, '.')) {
+    while (getline(check1, intermediate, '.'))
+    {
         tokens.push_back(intermediate);
     }
 
@@ -170,9 +168,8 @@ bool IpValidator::isValidIPv6(string ip)
     string intermediate;
 
     // Tokenizing w.r.t. ':'
-    while (getline(
-        check1,
-        intermediate, ':')) {
+    while (getline(check1, intermediate, ':'))
+    {
         tokens.push_back(intermediate);
     }
 
