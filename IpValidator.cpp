@@ -32,8 +32,6 @@ void IpValidator::setStartPos(const streampos startPos)
 void IpValidator::exploreIps()
 {
     string ip;
-    uniqueIPv4List_.clear();
-    uniqueIPv6List_.clear();
     while(file_ and file_.tellg() < endPos_)
     {
         getline(file_, ip);
@@ -52,16 +50,7 @@ void IpValidator::examineIP(string ip)
             lock_guard<mutex> lock(mtx_);
             if(uniqueIPv4List_.find(ip) == uniqueIPv4List_.end())
             {
-                cout<<"unique IP: "<<ip<<endl;//debug log
-                auto [entry, ret] = uniqueIPv4List_.insert(ip);
-                if(ret)
-                    cout<<"insertion successfull " << *entry <<" set size: "<<uniqueIPv4List_.size()<<endl;
-                else
-                    cout<<"insertion failed"<<endl;
-                for(auto str:uniqueIPv4List_)
-                {
-                    cout<<"<"<<str<<">"<<endl;
-                }
+                uniqueIPv4List_.insert(ip);
                 counter_.incrementUniqueIpv4Count();
             }
         }
