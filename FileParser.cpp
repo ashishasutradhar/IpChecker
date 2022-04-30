@@ -13,9 +13,8 @@ FileParser::FileParser(int numThreads, string filePath): numThreads_(numThreads)
     memChunk_ = fileSize_/numThreads_;
     for(int i=0; i<numThreads; i++)
     {
-        cout<<"FileParser::creating IpValidator Instances"<<endl; //debug log
         IpValidator_thread_pair_t ipValidatorThreadPair;
-        ipValidatorThreadPair.ipValidator_ = new IpValidator(filePath_,memChunk_);
+        ipValidatorThreadPair.ipValidator_ = new IpValidator(mtx_, filePath_,memChunk_);
         ipValidatorThreadPair.tInstance_ = nullptr;
         threadList_.push_back(ipValidatorThreadPair);
     }
@@ -45,6 +44,7 @@ void FileParser::createWorkerThreads()
         //3. increment till the next line
         string str;
         getline(file_, str);
+        i++;
     }
     joinWorkerThreads();
 }
@@ -57,20 +57,17 @@ void FileParser::joinWorkerThreads()
         {
             if(threadList_[i].tInstance_->joinable())
             {
-                cout<<"joining thread"<<endl;//debug logs
                 threadList_[i].tInstance_->join();
             }
             counter_ = counter_ + threadList_[i].ipValidator_->getCounter();
         }
         delete threadList_[i].ipValidator_;
         delete threadList_[i].tInstance_;
-        cout<<"deleting IpValidator and thread instance()"<<endl;//debug logs
     }
 }
 
 void FileParser::printCounters()
 {
-    cout<<"FileParser::printCounters"<<endl;//debug log
     cout<<"Total IPv4 address count  : "<<counter_.getIpv4Count()<<endl;
     cout<<"Total IPv6 address count  : "<<counter_.getIpv6Count()<<endl;
     cout<<"Unique IPv4 address count : "<<counter_.getUniqueIpv4Count()<<endl;

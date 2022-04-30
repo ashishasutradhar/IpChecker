@@ -3,6 +3,7 @@
 #include <fstream>
 #include <limits>
 #include <unordered_set>
+#include <mutex>
 #include "Utils.h"
 using namespace utils;
 using namespace std;
@@ -16,12 +17,16 @@ class IpValidator
     streampos startPos_;
     streampos endPos_;
     IpCounts counter_;
-    unordered_set<string> uniqueIPv4List_;
-    unordered_set<string> uniqueIPv6List_;
+    mutex &mtx_;
+    static unordered_set<string> uniqueIPv4List_;
+    static unordered_set<string> uniqueIPv6List_;
 
 
     public:
-    IpValidator(const string filePath = "", const streampos memChunk = 0, const streampos startPos = 0);
+    IpValidator(mutex &mtx,
+                const string filePath = "",
+                const streampos memChunk = 0,
+                const streampos startPos = 0);
     ~IpValidator();
     void operator()();
     void setStartPos(streampos startPos);
