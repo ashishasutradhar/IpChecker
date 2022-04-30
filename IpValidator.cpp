@@ -2,32 +2,31 @@
 #include <vector>
 #include <sstream>
 
-IpValidator::IpValidator(const string filePath, const streampos memChunk, const streampos startPos): filePath_(filePath), startPos_(startPos), memChunk_(memChunk)
+unordered_set<string> IpValidator::uniqueIPv4List_;
+unordered_set<string> IpValidator::uniqueIPv6List_;
+
+IpValidator::IpValidator(mutex &mtx, const string filePath, const streampos memChunk, const streampos startPos): filePath_(filePath), startPos_(startPos), memChunk_(memChunk), mtx_(mtx)
 {
-    cout<<"IpValidator::creating IpValidator Instance"<<endl; //debug log
     file_.open(filePath_, ios_base::binary); //need to handle exception
     file_.seekg(startPos); //updating the read pointer
-    endPos_ = file_.tellg() + memChunk_;
+    endPos_ = startPos_ + memChunk_;
 }
 
 IpValidator::~IpValidator()
 {
-    cout<<"IpValidator::~IpValidator Closing file"<<endl; //debug log
     file_.close();
 }
 
 void IpValidator::operator()()
 {
-    cout<<"Worker Thread Created"<<endl; //debug log
     exploreIps();
 }
 
 void IpValidator::setStartPos(const streampos startPos)
 {
     startPos_ = startPos;
-    file_.seekg(startPos); //updating the read pointer
-    endPos_ = file_.tellg() + memChunk_;
-    cout<<"IpValidator::setting startPos: "<<startPos_<<" and endPos: "<<endPos_<<endl;//debug log
+    file_.seekg(startPos_); //updating the read pointer
+    endPos_ = startPos_ + memChunk_;
 }
 
 void IpValidator::exploreIps()
@@ -39,30 +38,40 @@ void IpValidator::exploreIps()
     {
         getline(file_, ip);
         examineIP(ip);
+        file_.tellg();
     }
-    counter_.incrementUniqueIpv4Count(uniqueIPv4List_.size());
-    counter_.incrementUniqueIpv6Count(uniqueIPv6List_.size());
-    printCounters();
+    //printCounters();
 }
 
 void IpValidator::examineIP(string ip)
 {
-    cout<<"IP: "<<ip<<endl;//debug log
     if (isValidIPv4(ip))
     {
-        cout<<"IPv4"<<endl;//debug log
         counter_.incrementIpv4Count();
-        uniqueIPv4List_.insert(ip);
+        if(uniqueIPv4List_.find(ip) == uniqueIPv4List_.end())
+        {
+            {
+                lock_guard<mutex> lock(mtx_);
+                //cout<<"unique IP: "<<ip<<endl;//debug log
+                uniqueIPv4List_.insert(ip);
+            }
+            counter_.incrementUniqueIpv4Count();
+        }
     }
     else if (isValidIPv6(ip))
     {
-        cout<<"IPv6"<<endl;//debug log
         counter_.incrementIpv6Count();
-        uniqueIPv6List_.insert(ip);
+        if(uniqueIPv6List_.find(ip) == uniqueIPv6List_.end())
+        {
+            {
+                lock_guard<mutex> lock(mtx_);
+                uniqueIPv6List_.insert(ip);
+            }
+            counter_.incrementUniqueIpv6Count();
+        }
     }
     else
     {
-        cout<<"Invalid IP"<<endl;//debug log
         counter_.incrementInvalidIpCount();
     }
 }

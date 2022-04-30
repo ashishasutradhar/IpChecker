@@ -5,6 +5,7 @@
 #include <limits>
 #include <vector>
 #include <thread>
+#include <mutex>
 #include "IpValidator.h"
 #include "Common.h"
 using namespace std;
@@ -16,12 +17,6 @@ class FileParser
     {
         IpValidator* ipValidator_;
         thread* tInstance_;
-
-        // IpValidator_thread_pair(const string filePath = "",
-        //                         const streampos memChunk = 0,
-        //                         const streampos startPos = 0,
-        //                         thread* tInstance = nullptr): ipValidator_(filePath, memChunk, startPos), tInstance_(tInstance)
-        // {}
     }IpValidator_thread_pair_t;
 
     private:
@@ -32,6 +27,7 @@ class FileParser
     streampos memChunk_;
     vector<IpValidator_thread_pair_t> threadList_;
     IpCounts counter_;
+    mutex mtx_;
 
     private:
     FileParser(int numThreads, string filePath);

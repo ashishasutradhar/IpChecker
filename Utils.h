@@ -25,9 +25,9 @@ namespace utils
         const uint32_t& getIpv6Count() const{ return ipv6Count_; }
         void incrementIpv6Count(){ ++ipv6Count_; }
         const uint32_t& getUniqueIpv4Count() const{ return uniqueIpv4Count_; }
-        void incrementUniqueIpv4Count(const uint32_t uniqueIpv4Count = 0){ uniqueIpv4Count_+=uniqueIpv4Count; }
+        void incrementUniqueIpv4Count(const uint32_t uniqueIpv4Count = 1){ uniqueIpv4Count_+=uniqueIpv4Count; }
         const uint32_t& getUbiqueIpv6Count() const{ return ubiqueIpv6Count_; }
-        void incrementUniqueIpv6Count(const uint32_t ubiqueIpv6Count = 0){ ++ubiqueIpv6Count_+=ubiqueIpv6Count; }
+        void incrementUniqueIpv6Count(const uint32_t ubiqueIpv6Count = 1){ ubiqueIpv6Count_+=ubiqueIpv6Count; }
         IpCounts operator+(const IpCounts& obj);
     };
 };
