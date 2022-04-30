@@ -1,8 +1,0 @@
-FileParser Created.
-File ./sample.txt opened.
-File size: 12007012
-Total IPv4 address count  : 741077
-Total IPv6 address count  : 10
-Unique IPv4 address count : 353
-Unique IPv6 address count : 9
-Invalid IP address count  : 258921
