@@ -68,6 +68,9 @@ void FileParser::joinWorkerThreads()
 
 void FileParser::printCounters()
 {
+    cout<<"Total IPs processed       : "<<(counter_.getIpv4Count()+
+                                          counter_.getIpv6Count() +
+                                          counter_.getInvalidIpCount())<<endl;
     cout<<"Total IPv4 address count  : "<<counter_.getIpv4Count()<<endl;
     cout<<"Total IPv6 address count  : "<<counter_.getIpv6Count()<<endl;
     cout<<"Unique IPv4 address count : "<<counter_.getUniqueIpv4Count()<<endl;
